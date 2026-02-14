@@ -17,7 +17,11 @@ pipeline {
             steps {
                 echo 'Cleaning old JAR/WAR files...'
                 bat 'mvn clean'
-                bat 'del /Q target\\*.jar target\\*.war'
+                bat '''
+                    if exist target\\*.jar del /Q target\\*.jar
+                    if exist target\\*.war del /Q target\\*.war
+                    '''
+
             }
         }
 
