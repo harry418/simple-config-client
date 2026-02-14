@@ -43,10 +43,10 @@ pipeline {
             }
         }
 
-        stage('Stop Dev Environment') {
+       stage('Stop Dev Environment') {
             steps {
                 echo 'Stopping Spring Boot dev process...'
-                bat "pkill -f 'spring-boot:run.*dev' || true"
+                bat 'taskkill /F /IM java.exe || exit 0'
             }
         }
 
@@ -58,10 +58,10 @@ pipeline {
             }
         }
 
-        stage('Stop Prod Environment') {
+       stage('Stop Prod Environment') {
             steps {
                 echo 'Stopping Spring Boot prod process...'
-                bat "pkill -f 'spring-boot:run.*prod' || true"
+                bat 'taskkill /F /IM java.exe || exit 0'
             }
         }
 
