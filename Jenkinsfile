@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        maven 'maven'       // Must match Maven installation name in Jenkins
-        jdk 'Java_17'       // Must match JDK installation name in Jenkins
+        maven 'maven'
+        jdk 'Java_17'
     }
 
     stages {
@@ -15,7 +15,6 @@ pipeline {
 
         stage('Clean Artifacts') {
             steps {
-                echo 'Cleaning old JAR/WAR files...'
                 bat 'mvn clean'
                 bat '''
                 if exist target\\*.jar del /Q target\\*.jar
@@ -30,48 +29,9 @@ pipeline {
             }
         }
 
-        stage('Run Dev Environment') {
+        stage('Test on Dev Profile') {
             steps {
-                echo 'Starting Spring Boot app with dev profile...'
-                bat 'mvn spring-boot:run -Dspring-boot.run.profiles=dev -Dspring-boot.run.jvmArguments="-Dspring.pid.file=dev.pid"'
-            }
-        }
-
-        stage('Test on Dev') {
-            steps {
-                echo 'Running test cases on dev environment...'
                 bat 'mvn test -Dspring-boot.run.profiles=dev'
-            }
-        }
-
-        stage('Stop Dev Environment') {
-            steps {
-                echo 'Stopping Spring Boot dev process...'
-                bat '''
-                if exist dev.pid (
-                    for /F %%p in (dev.pid) do taskkill /F /PID %%p
-                    del dev.pid
-                )
-                '''
-            }
-        }
-
-        stage('Run Prod Environment') {
-            steps {
-                echo 'Starting Spring Boot app with prod profile...'
-                bat 'mvn spring-boot:run -Dspring-boot.run.profiles=prod -Dspring-boot.run.jvmArguments="-Dspring.pid.file=prod.pid"'
-            }
-        }
-
-        stage('Stop Prod Environment') {
-            steps {
-                echo 'Stopping Spring Boot prod process...'
-                bat '''
-                if exist prod.pid (
-                    for /F %%p in (prod.pid) do taskkill /F /PID %%p
-                    del prod.pid
-                )
-                '''
             }
         }
 
@@ -84,18 +44,11 @@ pipeline {
     }
 
     post {
-        always {
-            echo 'Cleaning up any leftover Spring Boot processes...'
-            bat '''
-            if exist dev.pid (
-                for /F %%p in (dev.pid) do taskkill /F /PID %%p
-                del dev.pid
-            )
-            if exist prod.pid (
-                for /F %%p in (prod.pid) do taskkill /F /PID %%p
-                del prod.pid
-            )
-            '''
+        success {
+            echo 'Build and tests completed successfully!'
+        }
+        failure {
+            echo 'Build failed. Check logs for details.'
         }
     }
 }
