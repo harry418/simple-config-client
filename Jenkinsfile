@@ -16,58 +16,58 @@ pipeline {
         stage('Clean Artifacts') {
             steps {
                 echo 'Cleaning old JAR/WAR files...'
-                sh 'mvn clean'
-                sh 'rm -f target/*.jar target/*.war || true'
+                bat 'mvn clean'
+                bat 'rm -f target/*.jar target/*.war || true'
             }
         }
 
         stage('Build') {
             steps {
-                sh 'mvn install -DskipTests'
+                bat 'mvn install -DskipTests'
             }
         }
 
         stage('Run Dev Environment') {
             steps {
                 echo 'Starting Spring Boot app with dev profile...'
-                sh 'mvn spring-boot:run -Dspring-boot.run.profiles=dev &'
+                bat 'mvn spring-boot:run -Dspring-boot.run.profiles=dev &'
                 // Give app some time to start
-                sh 'sleep 20'
+                bat 'sleep 20'
             }
         }
 
         stage('Test on Dev') {
             steps {
                 echo 'Running test cases on dev environment...'
-                sh 'mvn test -Dspring-boot.run.profiles=dev'
+                bat 'mvn test -Dspring-boot.run.profiles=dev'
             }
         }
 
         stage('Stop Dev Environment') {
             steps {
                 echo 'Stopping Spring Boot dev process...'
-                sh "pkill -f 'spring-boot:run.*dev' || true"
+                bat "pkill -f 'spring-boot:run.*dev' || true"
             }
         }
 
         stage('Run Prod Environment') {
             steps {
                 echo 'Starting Spring Boot app with prod profile...'
-                sh 'mvn spring-boot:run -Dspring-boot.run.profiles=prod &'
-                sh 'sleep 20'
+                bat 'mvn spring-boot:run -Dspring-boot.run.profiles=prod &'
+                bat 'sleep 20'
             }
         }
 
         stage('Stop Prod Environment') {
             steps {
                 echo 'Stopping Spring Boot prod process...'
-                sh "pkill -f 'spring-boot:run.*prod' || true"
+                bat "pkill -f 'spring-boot:run.*prod' || true"
             }
         }
 
         stage('Package') {
             steps {
-                sh 'mvn package'
+                bat 'mvn package'
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
@@ -76,7 +76,7 @@ pipeline {
     post {
         always {
             echo 'Cleaning up any leftover Spring Boot processes...'
-            sh "pkill -f 'spring-boot:run' || true"
+            bat "pkill -f 'spring-boot:run' || true"
         }
         success {
             echo 'Pipeline executed successfully!'
