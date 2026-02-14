@@ -21,6 +21,7 @@ pipeline {
             }
         }
 
+
         stage('Build') {
             steps {
                 bat 'mvn install -DskipTests'
@@ -44,10 +45,11 @@ pipeline {
 
         stage('Stop Dev Environment') {
             steps {
-                echo 'Stopping Spring Boot dev process...'
-               // bat 'taskkill /F /IM java.exe || exit 0'
+                bat 'if exist dev.pid (for /f %%p in (dev.pid) do taskkill /F /PID %%p)'
+                bat 'del dev.pid'
             }
         }
+
 
         stage('Run Prod Environment') {
             steps {
@@ -72,10 +74,11 @@ pipeline {
         }
     }
 
-    post {
+   post {
         always {
-            echo 'Cleaning up any leftover Spring Boot processes...'
-            //bat 'taskkill /F /IM java.exe || exit 0'
+            bat 'if exist dev.pid (for /f %%p in (dev.pid) do taskkill /F /PID %%p)'
+            bat 'if exist prod.pid (for /f %%p in (prod.pid) do taskkill /F /PID %%p)'
         }
     }
+
 }
