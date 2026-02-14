@@ -1,15 +1,15 @@
 pipeline {
     agent any
-    tools {
-        maven 'maven'   // Use the default Maven installation name
-        jdk 'Java_17'       // Use the default JDK installation name (if configured)
-     }
 
+    tools {
+        maven 'maven'       // Must match Maven installation name in Jenkins
+        jdk 'Java_17'       // Must match JDK installation name in Jenkins
+    }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: ' https://github.com/harry418/simple-config-client.git'
+                git branch: 'main', url: 'https://github.com/harry418/simple-config-client.git'
             }
         }
 
@@ -17,7 +17,7 @@ pipeline {
             steps {
                 echo 'Cleaning old JAR/WAR files...'
                 bat 'mvn clean'
-                bat 'rm -f target/*.jar target/*.war || true'
+                bat 'del /Q target\\*.jar target\\*.war'
             }
         }
 
@@ -30,9 +30,8 @@ pipeline {
         stage('Run Dev Environment') {
             steps {
                 echo 'Starting Spring Boot app with dev profile...'
-                bat 'mvn spring-boot:run -Dspring-boot.run.profiles=dev &'
-                // Give app some time to start
-                bat 'sleep 20'
+                bat 'start /B mvn spring-boot:run -Dspring-boot.run.profiles=dev'
+                bat 'timeout /T 20'
             }
         }
 
@@ -43,7 +42,7 @@ pipeline {
             }
         }
 
-       stage('Stop Dev Environment') {
+        stage('Stop Dev Environment') {
             steps {
                 echo 'Stopping Spring Boot dev process...'
                 bat 'taskkill /F /IM java.exe || exit 0'
@@ -53,12 +52,12 @@ pipeline {
         stage('Run Prod Environment') {
             steps {
                 echo 'Starting Spring Boot app with prod profile...'
-                bat 'mvn spring-boot:run -Dspring-boot.run.profiles=prod &'
-                bat 'sleep 20'
+                bat 'start /B mvn spring-boot:run -Dspring-boot.run.profiles=prod'
+                bat 'timeout /T 20'
             }
         }
 
-       stage('Stop Prod Environment') {
+        stage('Stop Prod Environment') {
             steps {
                 echo 'Stopping Spring Boot prod process...'
                 bat 'taskkill /F /IM java.exe || exit 0'
@@ -68,7 +67,7 @@ pipeline {
         stage('Package') {
             steps {
                 bat 'mvn package'
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                archiveArtifacts artifacts: 'target\\*.jar', fingerprint: true
             }
         }
     }
@@ -76,13 +75,7 @@ pipeline {
     post {
         always {
             echo 'Cleaning up any leftover Spring Boot processes...'
-            bat "pkill -f 'spring-boot:run' || true"
-        }
-        success {
-            echo 'Pipeline executed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed. Please check logs.'
+            bat 'taskkill /F /IM java.exe || exit 0'
         }
     }
 }
