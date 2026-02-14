@@ -45,8 +45,12 @@ pipeline {
 
         stage('Stop Dev Environment') {
             steps {
-                bat 'if exist dev.pid (for /f %%p in (dev.pid) do taskkill /F /PID %%p)'
-                bat 'del dev.pid'
+                 bat '''
+                    if exist prod.pid (
+                        for /F %%p in (dev.pid) do taskkill /F /PID %%p
+                        del dev.pid
+                    )
+                    '''
             }
         }
 
@@ -62,7 +66,12 @@ pipeline {
         stage('Stop Prod Environment') {
             steps {
                 echo 'Stopping Spring Boot prod process...'
-                //bat 'taskkill /F /IM java.exe || exit 0'
+                 bat '''
+                    if exist prod.pid (
+                        for /F %%p in (prod.pid) do taskkill /F /PID %%p
+                        del prod.pid
+                    )
+                    '''
             }
         }
 
@@ -76,8 +85,18 @@ pipeline {
 
    post {
         always {
-            bat 'if exist dev.pid (for /f %%p in (dev.pid) do taskkill /F /PID %%p)'
-            bat 'if exist prod.pid (for /f %%p in (prod.pid) do taskkill /F /PID %%p)'
+            bat '''
+                    if exist prod.pid (
+                        for /F %%p in (dev.pid) do taskkill /F /PID %%p
+                        del dev.pid
+                    )
+                    '''
+             bat '''
+                    if exist prod.pid (
+                        for /F %%p in (prod.pid) do taskkill /F /PID %%p
+                        del prod.pid
+                    )
+                    '''
         }
     }
 
