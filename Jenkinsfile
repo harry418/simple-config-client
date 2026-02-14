@@ -2,7 +2,7 @@ pipeline {
     agent any
     tools {
         maven 'maven'   // Use the default Maven installation name
-        jdk 'jdk'       // Use the default JDK installation name (if configured)
+        jdk 'Java_17'       // Use the default JDK installation name (if configured)
      }
 
 
