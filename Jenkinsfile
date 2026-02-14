@@ -31,7 +31,7 @@ pipeline {
 
         stage('Test on Dev Profile') {
             steps {
-                bat 'mvn test -Dspring-boot.run.profiles=dev'
+                bat 'mvn test -Dspring-boot.run.profiles=test'
             }
         }
 
