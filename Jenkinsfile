@@ -45,7 +45,7 @@ pipeline {
         stage('Stop Dev Environment') {
             steps {
                 echo 'Stopping Spring Boot dev process...'
-                bat 'taskkill /F /IM java.exe || exit 0'
+               // bat 'taskkill /F /IM java.exe || exit 0'
             }
         }
 
@@ -60,7 +60,7 @@ pipeline {
         stage('Stop Prod Environment') {
             steps {
                 echo 'Stopping Spring Boot prod process...'
-                bat 'taskkill /F /IM java.exe || exit 0'
+                //bat 'taskkill /F /IM java.exe || exit 0'
             }
         }
 
@@ -75,7 +75,7 @@ pipeline {
     post {
         always {
             echo 'Cleaning up any leftover Spring Boot processes...'
-            bat 'taskkill /F /IM java.exe || exit 0'
+            //bat 'taskkill /F /IM java.exe || exit 0'
         }
     }
 }
