@@ -2,87 +2,53 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven_3.8.6'   // Ensure Maven is configured in Jenkins
-        jdk 'Java_17'         // Ensure JDK is configured in Jenkins
+        maven 'maven'
+        jdk 'Java_17'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/your-username/your-repo.git'
+                git branch: 'main', url: 'https://github.com/harry418/simple-config-client.git'
             }
         }
 
         stage('Clean Artifacts') {
             steps {
-                echo 'Cleaning old JAR/WAR files...'
-                sh 'mvn clean'
-                sh 'rm -f target/*.jar target/*.war || true'
+                bat 'mvn clean'
+                bat '''
+                if exist target\\*.jar del /Q target\\*.jar
+                if exist target\\*.war del /Q target\\*.war
+                '''
             }
         }
 
         stage('Build') {
             steps {
-                sh 'mvn install -DskipTests'
+                bat 'mvn install -DskipTests'
             }
         }
 
-        stage('Run Dev Environment') {
+        stage('Test on Dev Profile') {
             steps {
-                echo 'Starting Spring Boot app with dev profile...'
-                sh 'mvn spring-boot:run -Dspring-boot.run.profiles=dev &'
-                // Give app some time to start
-                sh 'sleep 20'
-            }
-        }
-
-        stage('Test on Dev') {
-            steps {
-                echo 'Running test cases on dev environment...'
-                sh 'mvn test -Dspring-boot.run.profiles=dev'
-            }
-        }
-
-        stage('Stop Dev Environment') {
-            steps {
-                echo 'Stopping Spring Boot dev process...'
-                sh "pkill -f 'spring-boot:run.*dev' || true"
-            }
-        }
-
-        stage('Run Prod Environment') {
-            steps {
-                echo 'Starting Spring Boot app with prod profile...'
-                sh 'mvn spring-boot:run -Dspring-boot.run.profiles=prod &'
-                sh 'sleep 20'
-            }
-        }
-
-        stage('Stop Prod Environment') {
-            steps {
-                echo 'Stopping Spring Boot prod process...'
-                sh "pkill -f 'spring-boot:run.*prod' || true"
+                bat 'mvn test -Dspring-boot.run.profiles=test'
             }
         }
 
         stage('Package') {
             steps {
-                sh 'mvn package'
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                bat 'mvn package'
+                archiveArtifacts artifacts: 'target\\*.jar', fingerprint: true
             }
         }
     }
 
     post {
-        always {
-            echo 'Cleaning up any leftover Spring Boot processes...'
-            sh "pkill -f 'spring-boot:run' || true"
-        }
         success {
-            echo 'Pipeline executed successfully!'
+            echo 'Build and tests completed successfully!'
         }
         failure {
-            echo 'Pipeline failed. Please check logs.'
+            echo 'Build failed. Check logs for details.'
         }
     }
 }
